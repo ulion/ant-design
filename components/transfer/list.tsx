@@ -59,7 +59,10 @@ export interface TransferListProps<RecordType> extends TransferLocale {
   itemUnit: string;
   itemsUnit: string;
   renderList?: RenderListFunction<RecordType>;
-  footer?: (props: TransferListProps<RecordType>) => React.ReactNode;
+  footer?: (
+    props: TransferListProps<RecordType>,
+    info?: { direction: TransferDirection },
+  ) => React.ReactNode;
   onScroll: (e: React.UIEvent<HTMLUListElement>) => void;
   disabled?: boolean;
   direction: TransferDirection;
@@ -160,8 +163,6 @@ export default class TransferList<
     return text.indexOf(filterValue) >= 0;
   };
 
-  getCurrentPageItems = () => {};
-
   // =============================== Render ===============================
   renderListBody = (
     renderList: RenderListFunction<RecordType> | undefined,
@@ -183,7 +184,7 @@ export default class TransferList<
     searchPlaceholder: string,
     filterValue: string,
     filteredItems: RecordType[],
-    notFoundContent: React.ReactNode,
+    notFoundContent: React.ReactNode | React.ReactNode,
     filteredRenderItems: RenderedItem<RecordType>[],
     checkedKeys: string[],
     renderList?: RenderListFunction<RecordType>,
@@ -210,6 +211,11 @@ export default class TransferList<
       selectedKeys: checkedKeys,
     });
 
+    const getNotFoundContent = () => {
+      const contentIndex = this.props.direction === 'left' ? 0 : 1;
+      return Array.isArray(notFoundContent) ? notFoundContent[contentIndex] : notFoundContent;
+    };
+
     let bodyNode: React.ReactNode;
     // We should wrap customize list body in a classNamed div to use flex layout.
     if (customize) {
@@ -218,7 +224,7 @@ export default class TransferList<
       bodyNode = filteredItems.length ? (
         bodyContent
       ) : (
-        <div className={`${prefixCls}-body-not-found`}>{notFoundContent}</div>
+        <div className={`${prefixCls}-body-not-found`}>{getNotFoundContent()}</div>
       );
     }
 
@@ -318,10 +324,12 @@ export default class TransferList<
       showSelectAll = true,
       showRemove,
       pagination,
+      direction,
     } = this.props;
 
     // Custom Layout
-    const footerDom = footer && footer(this.props);
+    const footerDom =
+      footer && (footer.length < 2 ? footer(this.props) : footer(this.props, { direction }));
 
     const listCls = classNames(prefixCls, {
       [`${prefixCls}-with-pagination`]: !!pagination,
@@ -362,6 +370,7 @@ export default class TransferList<
           {/* Remove Current Page */}
           {pagination && (
             <Menu.Item
+              key="removeCurrent"
               onClick={() => {
                 const pageKeys = getEnabledItemKeys(
                   (this.defaultListBodyRef.current?.getItems() || []).map(entity => entity.item),
@@ -375,6 +384,7 @@ export default class TransferList<
 
           {/* Remove All */}
           <Menu.Item
+            key="removeAll"
             onClick={() => {
               onItemRemove?.(getEnabledItemKeys(filteredItems));
             }}
@@ -387,6 +397,7 @@ export default class TransferList<
       menu = (
         <Menu>
           <Menu.Item
+            key="selectAll"
             onClick={() => {
               const keys = getEnabledItemKeys(filteredItems);
               onItemSelectAll(keys, keys.length !== checkedKeys.length);
@@ -405,6 +416,7 @@ export default class TransferList<
             </Menu.Item>
           )}
           <Menu.Item
+            key="selectInvert"
             onClick={() => {
               let availableKeys: string[];
               if (pagination) {

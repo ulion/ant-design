@@ -16,6 +16,7 @@ import {
   BugOutlined,
   IssuesCloseOutlined,
   QuestionCircleOutlined,
+  BgColorsOutlined,
 } from '@ant-design/icons';
 import ColorPicker from '../Color/ColorPicker';
 import { loadScript, getLocalizedPathname } from '../utils';
@@ -34,7 +35,7 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
 
     const getLinkHash = (path: string, hash: { zhCN: string; enUS: string }) => {
       const pathName = getLocalizedPathname(path, isZhCN, location.query, hash);
-      const { pathname, query } = pathName;
+      const { pathname, query = {} } = pathName;
       const pathnames = pathname.split('#');
       if ('direction' in query) {
         return `${pathnames[0]}?direction=rtl#${pathnames[1]}`;
@@ -44,7 +45,7 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
 
     const getLink = (path: string) => {
       const pathName = getLocalizedPathname(path, isZhCN, location.query);
-      const { pathname, query } = pathName;
+      const { pathname, query = {} } = pathName;
       if ('direction' in query) {
         return `${pathname}?direction=rtl}`;
       }
@@ -306,7 +307,13 @@ class Footer extends React.Component<WrappedComponentProps & { location: any }> 
           openExternal: true,
         },
         {
-          title: this.renderThemeChanger(),
+          icon: <BgColorsOutlined />,
+          title: <FormattedMessage id="app.footer.theme" />,
+          url: getLinkHash('/components/config-provider/', {
+            zhCN: 'components-config-provider-demo-theme',
+            enUS: 'components-config-provider-demo-theme',
+          }),
+          LinkComponent: Link,
           style: {
             marginTop: 20,
           },

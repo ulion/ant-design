@@ -31,7 +31,7 @@ cover: https://gw.alipayobjects.com/zos/alicdn/eedWN59yJ/Dropdown.svg
 | placement | 菜单弹出位置：`bottomLeft` `bottomCenter` `bottomRight` `topLeft` `topCenter` `topRight` | string | `bottomLeft` |  |
 | trigger | 触发下拉的行为, 移动端不支持 hover | Array&lt;`click`\|`hover`\|`contextMenu`> | \[`hover`] |  |
 | visible | 菜单是否显示 | boolean | - |  |
-| onVisibleChange | 菜单显示状态改变时调用，参数为 `visible` | (visible: boolean) => void | - |  |
+| onVisibleChange | 菜单显示状态改变时调用，参数为 `visible`。点击菜单按钮导致的消失不会触发 | (visible: boolean) => void | - |  |
 
 `overlay` 菜单使用 [Menu](/components/menu/)，还包括菜单项 `Menu.Item`，分割线 `Menu.Divider`。
 
@@ -44,6 +44,7 @@ cover: https://gw.alipayobjects.com/zos/alicdn/eedWN59yJ/Dropdown.svg
 | 参数 | 说明 | 类型 | 默认值 | 版本 |
 | --- | --- | --- | --- | --- |
 | buttonsRender | 自定义左右两个按钮 | (buttons: ReactNode\[]) => ReactNode\[] | - |  |
+| loading | 设置按钮载入状态 | boolean \| { delay: number } | false |  |
 | disabled | 菜单是否禁用 | boolean | - |  |
 | icon | 右侧的 icon | ReactNode | - |  |
 | overlay | 菜单 | [Menu](/components/menu/) | - |  |

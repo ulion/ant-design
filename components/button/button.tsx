@@ -78,7 +78,7 @@ function spaceChildren(children: React.ReactNode, needInserted: boolean) {
 
 const ButtonTypes = tuple('default', 'primary', 'ghost', 'dashed', 'link', 'text');
 export type ButtonType = typeof ButtonTypes[number];
-const ButtonShapes = tuple('circle', 'round');
+const ButtonShapes = tuple('default', 'circle', 'round');
 export type ButtonShape = typeof ButtonShapes[number];
 const ButtonHTMLTypes = tuple('submit', 'button', 'reset');
 export type ButtonHTMLType = typeof ButtonHTMLTypes[number];
@@ -94,6 +94,7 @@ export function convertLegacyProps(type?: LegacyButtonType): ButtonProps {
 export interface BaseButtonProps {
   type?: ButtonType;
   icon?: React.ReactNode;
+  /** @default default */
   shape?: ButtonShape;
   size?: SizeType;
   loading?: boolean | { delay?: number };
@@ -137,7 +138,7 @@ const InternalButton: React.ForwardRefRenderFunction<unknown, ButtonProps> = (pr
     prefixCls: customizePrefixCls,
     type,
     danger,
-    shape,
+    shape = 'default',
     size: customizeSize,
     className,
     children,
@@ -176,12 +177,8 @@ const InternalButton: React.ForwardRefRenderFunction<unknown, ButtonProps> = (pr
   };
 
   // =============== Update Loading ===============
-  let loadingOrDelay: Loading;
-  if (typeof loading === 'object' && loading.delay) {
-    loadingOrDelay = loading.delay || true;
-  } else {
-    loadingOrDelay = !!loading;
-  }
+  const loadingOrDelay: Loading =
+    typeof loading === 'object' && loading.delay ? loading.delay || true : !!loading;
 
   React.useEffect(() => {
     clearTimeout(delayTimeoutRef.current);
@@ -221,19 +218,9 @@ const InternalButton: React.ForwardRefRenderFunction<unknown, ButtonProps> = (pr
   const prefixCls = getPrefixCls('btn', customizePrefixCls);
   const autoInsertSpace = autoInsertSpaceInButton !== false;
 
-  // large => lg
-  // small => sm
-  let sizeCls = '';
-  switch (customizeSize || size) {
-    case 'large':
-      sizeCls = 'lg';
-      break;
-    case 'small':
-      sizeCls = 'sm';
-      break;
-    default:
-      break;
-  }
+  const sizeClassNameMap = { large: 'lg', small: 'sm', middle: undefined };
+  const sizeFullname = customizeSize || size;
+  const sizeCls = sizeFullname ? sizeClassNameMap[sizeFullname] || '' : '';
 
   const iconType = innerLoading ? 'loading' : icon;
 
@@ -241,7 +228,7 @@ const InternalButton: React.ForwardRefRenderFunction<unknown, ButtonProps> = (pr
     prefixCls,
     {
       [`${prefixCls}-${type}`]: type,
-      [`${prefixCls}-${shape}`]: shape,
+      [`${prefixCls}-${shape}`]: shape !== 'default' && shape,
       [`${prefixCls}-${sizeCls}`]: sizeCls,
       [`${prefixCls}-icon-only`]: !children && children !== 0 && !!iconType,
       [`${prefixCls}-background-ghost`]: ghost && !isUnborderedButtonType(type),
@@ -293,7 +280,7 @@ const InternalButton: React.ForwardRefRenderFunction<unknown, ButtonProps> = (pr
     return buttonNode;
   }
 
-  return <Wave>{buttonNode}</Wave>;
+  return <Wave disabled={!!innerLoading}>{buttonNode}</Wave>;
 };
 
 const Button = React.forwardRef<unknown, ButtonProps>(InternalButton) as CompoundedComponent;
